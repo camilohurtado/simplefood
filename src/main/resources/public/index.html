@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SimpleFood</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #faf7f2; color: #222; }
+    header { background: #b5452f; color: #fff; padding: 16px 24px; }
+    main { max-width: 960px; margin: 0 auto; padding: 16px; display: grid; gap: 16px;
+           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    section { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px #0002; }
+    h2 { margin-top: 0; font-size: 1.1rem; }
+    li { margin: 4px 0; }
+    .estado { font-weight: 600; color: #b5452f; }
+  </style>
+</head>
+<body>
+<header><h1>SimpleFood</h1><p>Sistema Integral de Gestion de Restaurante</p></header>
+<main>
+  <section><h2>Menu del dia</h2><ul id="menu"></ul></section>
+  <section><h2>Pedidos en tiempo real</h2><ul id="pedidos"><li>Esperando eventos...</li></ul></section>
+</main>
+<script>
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+  const fmt = n => Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+  fetch('/api/menu/platos').then(r => r.json()).then(platos => {
+    document.getElementById('menu').innerHTML = platos
+      .map(p => `<li>${esc(p.nombre)} - ${fmt(p.precio)}</li>`).join('');
+  });
+  const lista = document.getElementById('pedidos');
+  const pedidos = {};
+  new EventSource('/api/eventos/pedidos').addEventListener('pedido', e => {
+    const p = JSON.parse(e.data);
+    pedidos[p.id] = p;
+    lista.innerHTML = Object.values(pedidos).map(x =>
+      `<li>Pedido #${x.id} - Mesa ${x.mesa}: <span class="estado">${x.estado}</span> (${fmt(x.total)})</li>`).join('');
+  });
+</script>
+</body>
+</html>
