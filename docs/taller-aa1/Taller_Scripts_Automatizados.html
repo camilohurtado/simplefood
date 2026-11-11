@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Taller Scripts Automatizados - Camilo Hurtado</title>
+<style>
+  @page { size: Letter; margin: 22mm 20mm 20mm 20mm;
+    @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 9pt system-ui, sans-serif; color: #777; }
+    @bottom-left { content: "AA1 · Scripts de prueba automatizados · SimpleFood"; font: 9pt system-ui, sans-serif; color: #777; } }
+  @page :first { @bottom-right { content: none; } @bottom-left { content: none; } }
+  :root { --acento: #b5452f; --tinta: #1f2328; --suave: #57606a; --borde: #d8dee4; --fondo: #f6f8fa; }
+  * { box-sizing: border-box; }
+  body { font: 10pt/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; color: var(--tinta); margin: 0; }
+  h1, h2, h3 { line-height: 1.25; break-after: avoid; }
+  h2 { font-size: 16pt; color: var(--acento); border-bottom: 2px solid var(--acento); padding-bottom: 4px; margin: 0 0 12px; }
+  h3 { font-size: 12pt; margin: 18px 0 6px; }
+  section.cap { break-before: page; }
+  p { margin: 6px 0 8px; text-align: justify; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9pt; break-inside: auto; }
+  th, td { border: 1px solid var(--borde); padding: 5px 7px; vertical-align: top; text-align: left; }
+  td:first-child { white-space: nowrap; }
+  th { background: var(--fondo); }
+  tr { break-inside: avoid; }
+  code { font: 8.8pt Menlo, Consolas, monospace; background: var(--fondo); padding: 1px 4px; border-radius: 3px; }
+  pre { font: 8.2pt/1.45 Menlo, Consolas, monospace; background: #1e1f24; color: #e6e6e6; padding: 10px 12px;
+        border-radius: 6px; white-space: pre-wrap; break-inside: avoid; margin: 6px 0 12px; }
+  pre .c { color: #8b949e; } pre .k { color: #ff7b72; } pre .s { color: #a5d6ff; } pre .a { color: #d2a8ff; }
+  figure { margin: 10px 0 14px; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--borde); border-radius: 4px; }
+  figure.media img { max-width: 62%; }
+  figure.pequena img { max-width: 62%; }
+  figcaption { font-size: 8.8pt; color: var(--suave); margin-top: 4px; }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; break-inside: avoid; }
+  .par figure { margin: 4px 0; }
+  .nota { border-left: 4px solid var(--acento); background: #fbf1ee; padding: 8px 12px; margin: 10px 0; break-inside: avoid; }
+  .ok { color: #1a7f37; font-weight: 600; }
+  ol li, ul li { margin: 3px 0; }
+  /* Portada */
+  .portada { height: 235mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .portada .banda { background: var(--acento); color: #fff; padding: 28px 30px; border-radius: 8px; }
+  .portada .banda small { letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  .portada h1 { font-size: 26pt; margin: 10px 0 6px; }
+  .portada .datos { font-size: 11pt; border-top: 1px solid var(--borde); padding-top: 14px; }
+  .portada .datos td { border: 0; padding: 4px 0; font-size: 11pt; }
+  .portada .datos td:first-child { color: var(--suave); width: 34%; }
+  .toc { font-size: 10.5pt; } .toc li { margin: 5px 0; }
+  .diagrama { white-space: pre; font: 8.3pt/1.4 Menlo, monospace; background: var(--fondo); color: var(--tinta); border: 1px solid var(--borde); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ PORTADA -->
+<div class="portada">
+  <div>
+    <div class="banda">
+      <small>Pruebas de Calidad de Software · Actividad AA1 – Taller individual</small>
+      <h1>Diseño de scripts de prueba automatizados para servicios REST y formularios web</h1>
+      <div>Caso de estudio: SimpleFood – Sistema Integral de Gestión de Restaurante (SIGR)</div>
+    </div>
+    <h3 style="margin-top:30px">Contenido</h3>
+    <ol class="toc">
+      <li>Introducción, objetivos y alcance</li>
+      <li>Herramientas y entorno de pruebas</li>
+      <li>Proceso de diseño de las pruebas (paso a paso)</li>
+      <li>Script 1 – Formulario web de registro (JUnit 5 + Selenium WebDriver)</li>
+      <li>Script 2 – API REST de autenticación y reservas (Postman + Newman)</li>
+      <li>Buenas prácticas de scripting aplicadas</li>
+      <li>Documentación técnica del flujo de ejecución</li>
+      <li>Reflexión sobre la utilidad de las pruebas automatizadas</li>
+      <li>Conclusiones y referencias</li>
+    </ol>
+  </div>
+  <table class="datos">
+    <tr><td>Estudiante</td><td><strong>Camilo Andrés Hurtado Carvajal</strong></td></tr>
+    <tr><td>Materia</td><td>Pruebas de Calidad de Software</td></tr>
+    <tr><td>Actividad</td><td>AA1 – Taller individual: scripts de prueba automatizados</td></tr>
+    <tr><td>Sistema bajo prueba</td><td>SimpleFood v1.0.0 (proyecto de Gestión del Software)</td></tr>
+    <tr><td>Repositorio</td><td>github.com/camilohurtado/simplefood · rama <code>feature/pruebas-automatizadas</code></td></tr>
+    <tr><td>Fecha</td><td>11 de noviembre de 2026</td></tr>
+  </table>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="cap">
+<h2>1. Introducción, objetivos y alcance</h2>
+<p>Este taller toma como caso de estudio <strong>SimpleFood</strong>, la aplicación web en Java 21 desarrollada en la materia
+Gestión del Software. SimpleFood expone una API REST (autenticación, menú, pedidos, reservas y caja) mediante un servidor HTTP
+embebido y una interfaz web estática. La línea base ya contaba con 23 pruebas unitarias y de integración en JUnit 5, pero
+<strong>no tenía pruebas funcionales automatizadas de interfaz de usuario ni una suite de API independiente del código</strong>,
+que son el foco de esta actividad.</p>
+
+<h3>Objetivos</h3>
+<ul>
+  <li>Aplicar principios de automatización de pruebas funcionales sobre un sistema real (no simulado).</li>
+  <li>Escribir código de prueba reutilizable y bien estructurado (Page Object Model, aserciones comunes, datos parametrizados).</li>
+  <li>Documentar paso a paso el diseño, la implementación, la ejecución y las evidencias de las pruebas.</li>
+</ul>
+
+<h3>Alcance</h3>
+<table>
+  <tr><th style="width:22%">Script</th><th>Objeto de prueba</th><th style="width:22%">Herramienta</th><th style="width:16%">Resultado</th></tr>
+  <tr><td>Script 1 – Formulario web</td><td>Formulario de registro de clientes <code>/registro.html</code>, que consume <code>POST /api/auth/registro</code>.</td>
+      <td>JUnit 5 + Selenium WebDriver 4.33</td><td class="ok">8 de 8 casos aprobados</td></tr>
+  <tr><td>Script 2 – API REST</td><td>Endpoints <code>/api/auth/login</code> y <code>/api/reservas</code> (crear, listar, cancelar) con control de roles.</td>
+      <td>Postman (colección v2.1) + Newman 6.2</td><td class="ok">14 peticiones, 62 aserciones aprobadas</td></tr>
+</table>
+<div class="nota"><strong>Nota sobre el formulario.</strong> La interfaz original de SimpleFood solo mostraba el menú y los pedidos en
+tiempo real; no tenía formularios. Para cumplir el objetivo del taller sobre un flujo real se agregó la página
+<code>registro.html</code>, que usa el endpoint de registro ya existente y replica en el navegador las reglas de negocio de
+<code>AuthService.registrar</code> (nombre obligatorio, correo válido, clave de al menos 6 caracteres). Los campos tienen
+atributos <code>id</code> estables pensados para la automatización (diseño para la testabilidad).</div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="cap">
+<h2>2. Herramientas y entorno de pruebas</h2>
+<table>
+  <tr><th style="width:26%">Componente</th><th style="width:20%">Versión</th><th>Uso en el taller</th></tr>
+  <tr><td>Java (Amazon Corretto)</td><td>21.0.8</td><td>Lenguaje del sistema y de los scripts JUnit/Selenium.</td></tr>
+  <tr><td>Apache Maven</td><td>3.9.3</td><td>Compilación, gestión de dependencias y ejecución (<code>mvn test</code>, perfil <code>e2e</code>).</td></tr>
+  <tr><td>JUnit Jupiter</td><td>5.10.3</td><td>Motor de pruebas: ciclo de vida, <code>@Tag</code>, <code>@DisplayName</code>, pruebas parametrizadas, <code>assertAll</code>.</td></tr>
+  <tr><td>Selenium WebDriver</td><td>4.33.0</td><td>Automatización del navegador. Selenium Manager descarga el <code>chromedriver</code> compatible.</td></tr>
+  <tr><td>Google Chrome</td><td>157 (modo <em>headless</em>)</td><td>Navegador donde se ejecuta el formulario.</td></tr>
+  <tr><td>Postman (formato colección v2.1)</td><td>—</td><td>Diseño de la colección de pruebas de API; importable en la aplicación Postman.</td></tr>
+  <tr><td>Newman + newman-reporter-htmlextra</td><td>6.2.3 / 1.23.1</td><td>Ejecución de la colección por línea de comandos y reportes HTML/JUnit.</td></tr>
+  <tr><td>Node.js / npm</td><td>20.19.5</td><td>Entorno de ejecución de Newman (<code>npm test</code>).</td></tr>
+  <tr><td>Git / GitHub</td><td>—</td><td>Control de versiones; trabajo en la rama <code>feature/pruebas-automatizadas</code>.</td></tr>
+  <tr><td>Sistema operativo</td><td>macOS (Darwin 25)</td><td>Equipo de desarrollo y ejecución.</td></tr>
+</table>
+
+<h3>Estructura de archivos agregados al repositorio</h3>
+<pre>simplefood/
+├── pom.xml                                   <span class="c"># + selenium-java, perfil e2e, filtros por @Tag</span>
+├── src/main/resources/public/
+│   ├── index.html                            <span class="c"># + enlace "Registrarse"</span>
+│   └── registro.html                         <span class="c"># NUEVO: formulario web bajo prueba</span>
+├── src/test/java/com/simplefood/e2e/
+│   ├── BaseE2ETest.java                      <span class="c"># servidor embebido, navegador, capturas</span>
+│   ├── RegistroClienteE2ETest.java           <span class="c"># SCRIPT 1: casos de prueba del formulario</span>
+│   └── paginas/RegistroPage.java             <span class="c"># Page Object del formulario</span>
+├── pruebas/postman/
+│   ├── SimpleFood_API.postman_collection.json <span class="c"># SCRIPT 2: colección de pruebas de API</span>
+│   ├── local.postman_environment.json        <span class="c"># variables de entorno (URL, credenciales demo)</span>
+│   └── package.json                          <span class="c"># npm test -&gt; newman run ... (cli, htmlextra, junit)</span>
+└── docs/taller-aa1/                          <span class="c"># este documento y sus evidencias</span></pre>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="cap">
+<h2>3. Proceso de diseño de las pruebas (paso a paso)</h2>
+<p>Se siguió el mismo proceso para ambos scripts, inspirado en el proceso de pruebas fundamental de ISTQB
+(análisis → diseño → implementación → ejecución → cierre):</p>
+<ol>
+  <li><strong>Análisis de la base de pruebas.</strong> Se leyó el código de <code>Rutas.java</code>, <code>AuthService.java</code> y
+      <code>ReservaService.java</code> para extraer las reglas de negocio reales: validaciones del registro, horario de reservas
+      (11:00 a 21:00), número de personas (1 a 12), reservas solo en fechas futuras, permisos por rol y el mapeo de errores
+      a códigos HTTP (<code>Sesion…</code> → 401, <code>Acceso…</code> → 403, resto de reglas → 400).</li>
+  <li><strong>Identificación de condiciones de prueba</strong> con técnicas de caja negra:
+      <ul>
+        <li><em>Partición de equivalencias:</em> datos válidos vs. cada clase inválida (nombre vacío, correo sin «@», clave corta, claves distintas).</li>
+        <li><em>Análisis de valores límite:</em> personas = 0 y 13 (justo fuera de 1–12); clave de 5 caracteres (límite 6).</li>
+        <li><em>Pruebas negativas y de seguridad básica:</em> sin token (401), rol no autorizado (403), credenciales incorrectas, la respuesta no expone la clave.</li>
+        <li><em>Pruebas de flujo (escenario):</em> login → crear reserva → consultarla como mesero → cancelarla.</li>
+      </ul></li>
+  <li><strong>Diseño de casos de prueba:</strong> se redactaron las matrices CP-WEB y CP-API (secciones 4.2 y 5.2) con datos de
+      entrada, precondiciones y resultado esperado <em>antes</em> de escribir el código.</li>
+  <li><strong>Diseño de la arquitectura del script:</strong> separación en capas (infraestructura / objetos de página / casos),
+      variables de entorno y aserciones comunes, para que los scripts sean reutilizables y fáciles de mantener.</li>
+  <li><strong>Implementación</strong> de los scripts con nombres descriptivos en español y un identificador de caso por prueba.</li>
+  <li><strong>Ejecución y recolección de evidencias:</strong> las capturas de pantalla se generan automáticamente durante la
+      ejecución de Selenium y Newman produce reportes HTML y JUnit XML.</li>
+  <li><strong>Verificación de la eficacia de los scripts:</strong> se inyectó un defecto a propósito para comprobar que la suite lo detecta
+      (sección 4.6) y se depuró un falso positivo detectado en la colección de Postman (sección 5.6).</li>
+  <li><strong>Cierre:</strong> versionamiento en Git con commits que referencian la materia, y este documento.</li>
+</ol>
+
+<h3>Requisitos funcionales trazados a los casos de prueba</h3>
+<table>
+  <tr><th style="width:12%">Id</th><th>Requisito (extraído del código)</th><th style="width:30%">Casos que lo verifican</th></tr>
+  <tr><td>RF-01</td><td>Un visitante puede registrarse como cliente con nombre, correo válido y clave de mínimo 6 caracteres.</td><td>CP-WEB-01, 02, 04, 05</td></tr>
+  <tr><td>RF-02</td><td>No se permite registrar dos veces el mismo correo.</td><td>CP-WEB-03</td></tr>
+  <tr><td>RF-03</td><td>El inicio de sesión entrega un token de sesión y el rol del usuario.</td><td>CP-API-01, 02, 03</td></tr>
+  <tr><td>RF-04</td><td>Un cliente autenticado puede reservar mesa en fecha futura, de 11:00 a 21:00, para 1 a 12 personas.</td><td>CP-API-04, 07, 09–13</td></tr>
+  <tr><td>RF-05</td><td>Solo meseros y administradores consultan las reservas del día.</td><td>CP-API-05, 08</td></tr>
+  <tr><td>RF-06</td><td>Un cliente puede cancelar sus propias reservas.</td><td>CP-API-06, 14</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section style="margin-top:22px">
+<h2>4. Script 1 – Formulario web de registro (JUnit 5 + Selenium)</h2>
+
+<h3>4.1 Objeto de prueba</h3>
+<p>El formulario <code>/registro.html</code> tiene cuatro campos (nombre, correo, clave y confirmación) y un botón «Crear cuenta».
+Al enviar, valida los datos en el navegador; si son válidos llama a <code>POST /api/auth/registro</code> y muestra una alerta de
+éxito (y limpia el formulario) o la alerta de error devuelta por el servidor.</p>
+<div class="par">
+  <figure><img src="evidencias/web_01_pagina_principal.png"><figcaption>Figura 1. Página principal con el enlace «Registrarse» (captura de Selenium, CP-WEB-01).</figcaption></figure>
+  <figure><img src="evidencias/web_02_formulario_diligenciado.png"><figcaption>Figura 2. Formulario diligenciado por el script antes de enviar (CP-WEB-02).</figcaption></figure>
+</div>
+
+<h3>4.2 Matriz de casos de prueba</h3>
+<table>
+  <tr><th style="width:10%">Id</th><th style="width:22%">Caso</th><th style="width:27%">Datos de entrada</th><th>Resultado esperado</th><th style="width:9%">Estado</th></tr>
+  <tr><td>CP-WEB-01</td><td>Navegación al formulario</td><td>Clic en «Registrarse» desde <code>/</code></td><td>Se carga <code>/registro.html</code> con el botón «Crear cuenta».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-02</td><td>Registro exitoso</td><td>Laura Gomez · correo único · <code>secreta123</code> ×2</td><td>Alerta verde «Bienvenido, Laura Gomez. Tu cuenta de cliente fue creada.», formulario limpio y el usuario puede iniciar sesión en el backend.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-03</td><td>Correo duplicado</td><td><code>cliente@simplefood.com</code> (ya existe)</td><td>Alerta roja con el error de la API: «El correo ya esta registrado».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-04 [1]</td><td>Nombre vacío</td><td>nombre = «»</td><td>«El nombre es obligatorio», campo marcado inválido, no se llama a la API ni se crea el usuario.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-04 [2]</td><td>Correo inválido</td><td><code>ana-sin-arroba</code></td><td>«Ingrese un correo valido», ídem.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-04 [3]</td><td>Clave corta (valor límite)</td><td><code>12345</code> (5 caracteres)</td><td>«La clave debe tener al menos 6 caracteres», ídem.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-04 [4]</td><td>Claves distintas</td><td><code>clave12</code> / <code>clave99</code></td><td>«Las claves no coinciden», ídem.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-WEB-05</td><td>Formulario vacío</td><td>Ningún dato</td><td>Nombre, correo y clave marcados como inválidos.</td><td class="ok">Aprobado</td></tr>
+</table>
+
+<h3>4.3 Arquitectura del script</h3>
+<pre class="diagrama">+----------------------------------+  hereda  +--------------------------------------+
+| RegistroClienteE2ETest           |--------->| BaseE2ETest   @Tag("e2e")            |
+|  - casos CP-WEB-01 a CP-WEB-05   |          |  - @BeforeAll: levanta ServidorWeb   |
+|  - solo describe QUE se prueba   |          |    en puerto libre con datos demo    |
++----------------------------------+          |  - @BeforeEach: Chrome headless      |
+                 | usa                        |  - @AfterEach: captura final, quit() |
+                 v                            |  - capturar(), correoUnico()         |
++----------------------------------+          +--------------------------------------+
+| RegistroPage  (Page Object)      |
+|  - localizadores By.id(...)      |   WebDriver    +--------+   HTTP   /registro.html
+|  - acciones: llenar(), enviar()  |--------------->| Chrome |-------> POST /api/auth/registro
+|  - consultas con esperas         |                +--------+
+|    explicitas (WebDriverWait)    |
++----------------------------------+</pre>
+<p>La prueba levanta el <strong>servidor real</strong> de SimpleFood dentro de la misma JVM, en un puerto libre (puerto 0), por lo que
+no depende de un ambiente externo y puede verificar efectos en el backend (por ejemplo, que el usuario creado pueda iniciar sesión).
+Cada caso abre un navegador nuevo, garantizando independencia entre pruebas.</p>
+</section>
+
+<section>
+<h3>4.4 Código relevante</h3>
+<p><strong>Page Object</strong> (<code>RegistroPage.java</code>, extracto): encapsula localizadores y acciones; si cambia el HTML solo se ajusta esta clase.</p>
+<pre><span class="k">public class</span> RegistroPage {
+    <span class="k">public static final</span> String RUTA = <span class="s">"/registro.html"</span>;
+    <span class="k">private static final</span> By NOMBRE = By.id(<span class="s">"nombre"</span>);
+    <span class="k">private static final</span> By CORREO = By.id(<span class="s">"correo"</span>);
+    <span class="k">private static final</span> By BOTON_REGISTRAR = By.id(<span class="s">"btn-registrar"</span>);
+    <span class="k">private static final</span> By ALERTA = By.id(<span class="s">"alerta"</span>);
+    ...
+    <span class="k">public</span> RegistroPage abrir(String urlBase) {
+        driver.get(urlBase + RUTA);
+        espera.until(ExpectedConditions.visibilityOfElementLocated(BOTON_REGISTRAR));
+        <span class="k">return this</span>;
+    }
+    <span class="c">/** Atajo para llenar todo el formulario con la misma clave en ambos campos. */</span>
+    <span class="k">public</span> RegistroPage llenar(String nombre, String correo, String clave) {
+        <span class="k">return</span> conNombre(nombre).conCorreo(correo).conClave(clave).conConfirmacion(clave);
+    }
+    <span class="c">/** Espera a que el servidor responda y la alerta sea visible; devuelve su texto. */</span>
+    <span class="k">public</span> String mensajeAlerta() {
+        <span class="k">return</span> espera.until(ExpectedConditions.visibilityOfElementLocated(ALERTA)).getText();
+    }
+}</pre>
+
+<p><strong>Caso de prueba de registro exitoso</strong> (<code>RegistroClienteE2ETest.java</code>): patrón Preparar–Actuar–Verificar,
+<code>assertAll</code> para reportar todas las fallas juntas y verificación cruzada contra el backend.</p>
+<pre><span class="a">@Test</span>
+<span class="a">@DisplayName</span>(<span class="s">"CP-WEB-02 Registro exitoso muestra bienvenida, limpia el formulario y crea el usuario"</span>)
+<span class="k">void</span> registroExitoso() {
+    String correo = correoUnico(<span class="s">"laura.gomez"</span>);                    <span class="c">// datos únicos: prueba repetible</span>
+    RegistroPage pagina = <span class="k">new</span> RegistroPage(driver).abrir(urlBase())
+            .llenar(<span class="s">"Laura Gomez"</span>, correo, <span class="s">"secreta123"</span>);
+    capturar(<span class="s">"formulario_diligenciado"</span>);
+
+    String mensaje = pagina.enviar().mensajeAlerta();
+    capturar(<span class="s">"mensaje_exito"</span>);
+
+    assertAll(
+        () -&gt; assertTrue(pagina.alertaEsDeExito(), <span class="s">"La alerta debe ser de exito"</span>),
+        () -&gt; assertEquals(<span class="s">"Bienvenido, Laura Gomez. Tu cuenta de cliente fue creada."</span>, mensaje),
+        () -&gt; assertEquals(<span class="s">""</span>, pagina.valorDe(<span class="s">"correo"</span>), <span class="s">"El formulario debe limpiarse"</span>),
+        <span class="c">// Verificacion en el backend: el usuario puede iniciar sesion con la clave registrada</span>
+        () -&gt; assertDoesNotThrow(() -&gt; contexto.auth().iniciarSesion(correo, <span class="s">"secreta123"</span>)));
+}</pre>
+
+<p><strong>Prueba parametrizada guiada por datos</strong>: un solo método cubre las cuatro clases de equivalencia inválidas.
+Agregar un caso nuevo es agregar una fila.</p>
+<pre><span class="a">@ParameterizedTest</span>(name = <span class="s">"[{index}] {5}"</span>)
+<span class="a">@CsvSource</span>(delimiter = <span class="s">'|'</span>, textBlock = <span class="s">"""
+    # nombre      | correo            | clave   | confirmacion | campo        | mensaje esperado
+    ''            | ana@prueba.com    | clave12 | clave12      | nombre       | El nombre es obligatorio
+    Ana Ruiz      | ana-sin-arroba    | clave12 | clave12      | correo       | Ingrese un correo valido
+    Ana Ruiz      | ana@prueba.com    | 12345   | 12345        | clave        | La clave debe tener al menos 6 caracteres
+    Ana Ruiz      | ana@prueba.com    | clave12 | clave99      | confirmacion | Las claves no coinciden
+    """</span>)
+<span class="k">void</span> validacionesDelCliente(String nombre, String correo, String clave, String confirmacion,
+                            String campo, String mensajeEsperado) {
+    RegistroPage pagina = <span class="k">new</span> RegistroPage(driver).abrir(urlBase())
+            .conNombre(nombre).conCorreo(correo).conClave(clave).conConfirmacion(confirmacion).enviar();
+    capturar(<span class="s">"validacion_"</span> + campo);
+    assertAll(
+        () -&gt; assertEquals(mensajeEsperado, pagina.errorDeCampo(campo)),
+        () -&gt; assertTrue(pagina.campoMarcadoInvalido(campo)),
+        () -&gt; assertFalse(pagina.alertaVisible(), <span class="s">"No debe llamarse a la API"</span>),
+        () -&gt; assertThrows(NegocioException.<span class="k">class</span>,
+                () -&gt; contexto.auth().iniciarSesion(correo, clave), <span class="s">"El usuario no debe haberse creado"</span>));
+}</pre>
+
+<p><strong>Configuración Maven</strong>: las pruebas de interfaz se etiquetan con <code>@Tag("e2e")</code> y solo corren con el perfil
+<code>e2e</code>; así <code>mvn test</code> sigue siendo rápido y no exige un navegador instalado.</p>
+<pre>&lt;<span class="k">plugin</span>&gt; maven-surefire-plugin 3.2.5
+    &lt;<span class="k">groups</span>&gt;${grupos.incluidos}&lt;/<span class="k">groups</span>&gt;             <span class="c">&lt;!-- por defecto: todas --&gt;</span>
+    &lt;<span class="k">excludedGroups</span>&gt;${grupos.excluidos}&lt;/<span class="k">excludedGroups</span>&gt; <span class="c">&lt;!-- por defecto: e2e --&gt;</span>
+&lt;<span class="k">profile</span>&gt; &lt;id&gt;e2e&lt;/id&gt;  <span class="c">&lt;!-- mvn test -Pe2e : grupos.incluidos=e2e, grupos.excluidos=(vacío) --&gt;</span></pre>
+</section>
+
+<section>
+<h3>4.5 Ejecución y resultados</h3>
+<figure><img src="evidencias/consola_02_mvn_test_e2e.png"><figcaption>Figura 3. Ejecución de <code>mvn test -Pe2e</code>: 8 pruebas, 0 fallas. El árbol muestra el <code>@DisplayName</code> y el tiempo de cada caso tomados del reporte de Surefire.</figcaption></figure>
+<figure><img src="evidencias/consola_01_mvn_test.png"><figcaption>Figura 4. <code>mvn test</code> sin perfil: las 23 pruebas existentes siguen pasando y las pruebas e2e quedan excluidas.</figcaption></figure>
+
+<p>Capturas de pantalla tomadas automáticamente por el script (<code>BaseE2ETest.capturar</code>) en cada caso:</p>
+<div class="par">
+  <figure><img src="evidencias/web_03_registro_exitoso.png"><figcaption>Figura 5. CP-WEB-02: registro exitoso y formulario limpio.</figcaption></figure>
+  <figure><img src="evidencias/web_04_correo_duplicado.png"><figcaption>Figura 6. CP-WEB-03: error del servidor por correo duplicado.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="evidencias/web_05_validacion_nombre.png"><figcaption>Figura 7. CP-WEB-04 [1]: nombre vacío.</figcaption></figure>
+  <figure><img src="evidencias/web_06_validacion_correo.png"><figcaption>Figura 8. CP-WEB-04 [2]: correo inválido.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="evidencias/web_07_validacion_clave.png"><figcaption>Figura 9. CP-WEB-04 [3]: clave de 5 caracteres (valor límite).</figcaption></figure>
+  <figure><img src="evidencias/web_08_validacion_confirmacion.png"><figcaption>Figura 10. CP-WEB-04 [4]: las claves no coinciden.</figcaption></figure>
+</div>
+<figure class="pequena"><img src="evidencias/web_09_formulario_vacio.png"><figcaption>Figura 11. CP-WEB-05: formulario enviado vacío, todos los campos obligatorios marcados.</figcaption></figure>
+
+<h3>4.6 Verificación de la eficacia del script (defecto inyectado)</h3>
+<p>Una suite que siempre pasa no demuestra nada si no es capaz de fallar. Para validarla se introdujo a propósito un defecto en
+<code>registro.html</code>: la regla de longitud mínima de la clave se cambió de <code>&gt;= 6</code> a <code>&gt;= 5</code>
+(un error típico de «uno por fuera»). El caso de valor límite CP-WEB-04 [3] lo detectó de inmediato y, gracias a
+<code>assertAll</code>, reportó las tres consecuencias del defecto: no aparece el mensaje, el campo no se marca como inválido y
+el formulario sí llamó a la API. Después se restauró el código y la suite volvió a quedar en verde.</p>
+<figure><img src="evidencias/consola_03_defecto_inyectado.png"><figcaption>Figura 12. Salida real de la ejecución con el defecto inyectado: el script falla con mensajes que señalan la causa.</figcaption></figure>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="cap">
+<h2>5. Script 2 – API REST de autenticación y reservas (Postman + Newman)</h2>
+
+<h3>5.1 Objeto de prueba</h3>
+<table>
+  <tr><th style="width:12%">Método</th><th style="width:30%">Ruta</th><th>Descripción</th><th style="width:18%">Rol requerido</th></tr>
+  <tr><td>POST</td><td><code>/api/auth/login</code></td><td>Recibe correo y clave; devuelve <code>token</code> y <code>usuario</code>.</td><td>Público</td></tr>
+  <tr><td>POST</td><td><code>/api/reservas</code></td><td>Crea una reserva <code>{"fechaHora","personas"}</code> y asigna mesa.</td><td>Cliente / Admin</td></tr>
+  <tr><td>GET</td><td><code>/api/reservas?fecha=aaaa-mm-dd</code></td><td>Lista las reservas del día.</td><td>Mesero / Admin</td></tr>
+  <tr><td>DELETE</td><td><code>/api/reservas/{id}</code></td><td>Cancela una reserva (el cliente solo las propias).</td><td>Autenticado</td></tr>
+</table>
+
+<h3>5.2 Matriz de casos de prueba</h3>
+<table>
+  <tr><th style="width:10%">Id</th><th style="width:30%">Petición</th><th>Verificaciones (además de tiempo &lt; 1000 ms y Content-Type JSON)</th><th style="width:9%">Estado</th></tr>
+  <tr><td>CP-API-01</td><td>Login cliente válido</td><td>200; token de más de 20 caracteres; rol CLIENTE; correo correcto; la respuesta no contiene «clave». Guarda <code>tokenCliente</code>.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-02</td><td>Login mesero válido</td><td>200; rol MESERO. Guarda <code>tokenMesero</code>.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-03</td><td>Login con clave incorrecta</td><td>400 «Credenciales invalidas»; no entrega token.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-04</td><td>Cliente crea reserva (hoy+3, 19:30, 4 personas)</td><td>201; cumple el <strong>esquema JSON</strong> de Reserva; estado CONFIRMADA; datos iguales a los enviados. Guarda <code>reservaId</code>.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-05</td><td>Mesero consulta reservas del día</td><td>200; es una lista; incluye <code>reservaId</code>; todas son del día consultado.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-06</td><td>Cliente cancela su reserva</td><td>200; estado CANCELADA; mismo id.</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-07</td><td>Crear reserva sin token</td><td>401 «Sesion no valida».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-08</td><td>Cliente lista reservas</td><td>403 «Acceso denegado para el rol CLIENTE».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-09</td><td>Reserva en fecha pasada (ayer)</td><td>400 «La reserva debe ser en una fecha futura».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-10</td><td>Reserva a las 23:00</td><td>400 «Horario de reservas: 11:00 a 21:00».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-11</td><td>13 personas (límite superior + 1)</td><td>400 «Numero de personas invalido (1 a 12)».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-12</td><td>0 personas (límite inferior − 1)</td><td>400 «Numero de personas invalido (1 a 12)».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-13</td><td>Formato de fecha inválido</td><td>400 «Fecha y hora invalidas, use aaaa-mm-ddThh:mm».</td><td class="ok">Aprobado</td></tr>
+  <tr><td>CP-API-14</td><td>Cancelar reserva inexistente</td><td>400 «Reserva no encontrada: 999999».</td><td class="ok">Aprobado*</td></tr>
+</table>
+<p style="font-size:9pt">* <strong>Observación de calidad:</strong> la API responde <code>400 Bad Request</code> cuando el recurso no existe. El script documenta el
+comportamiento actual, pero semánticamente lo correcto sería <code>404 Not Found</code>. Se registra como mejora sugerida para
+<code>ServidorWeb.api</code>, que hoy solo distingue 401, 403 y 400.</p>
+
+<h3>5.3 Diseño de la colección</h3>
+<ul>
+  <li><strong>Organización por carpetas</strong>: <em>01 Autenticación</em>, <em>02 Reservas – flujo principal</em>, <em>03 Reservas – casos negativos</em>. Newman las ejecuta en orden.</li>
+  <li><strong>Entorno separado</strong> (<code>local.postman_environment.json</code>): <code>baseUrl</code> y credenciales de demostración. Para probar otro ambiente basta con otro archivo de entorno; la colección no cambia.</li>
+  <li><strong>Encadenamiento de peticiones</strong>: el token del login y el id de la reserva se guardan en variables de colección y se reutilizan en las siguientes peticiones (<code>Bearer {{tokenCliente}}</code>, <code>/api/reservas/{{reservaId}}</code>).</li>
+  <li><strong>Datos dinámicos</strong>: el pre-request de la colección calcula las fechas (hoy+3, ayer, 23:00) en cada ejecución, de modo que la suite funciona cualquier día sin editarla.</li>
+  <li><strong>Aserciones comunes reutilizables</strong>: el script de pruebas a nivel de colección se ejecuta después de <em>cada</em> petición y verifica tiempo de respuesta y Content-Type.</li>
+  <li><strong>Casos negativos declarativos</strong>: cada caso negativo solo declara lo que espera; la verificación está escrita una sola vez.</li>
+  <li><strong>Validación de contrato</strong> con JSON Schema en la creación de reservas.</li>
+</ul>
+</section>
+
+<section>
+<h3>5.4 Código relevante</h3>
+<p><strong>Script de pruebas a nivel de colección</strong> (se ejecuta tras cada petición):</p>
+<pre><span class="c">// ---- Aserciones comunes a TODAS las peticiones ----</span>
+<span class="k">const</span> limite = Number(pm.collectionVariables.get(<span class="s">"tiempoMaximoMs"</span>));
+pm.test(<span class="s">"[comun] Responde en menos de "</span> + limite + <span class="s">" ms"</span>, () =&gt; {
+    pm.expect(pm.response.responseTime).to.be.below(limite);
+});
+pm.test(<span class="s">"[comun] Content-Type es JSON"</span>, () =&gt; {
+    pm.expect(pm.response.headers.get(<span class="s">"Content-Type"</span>)).to.include(<span class="s">"application/json"</span>);
+});
+<span class="c">// ---- Verificacion declarativa de casos negativos ----</span>
+<span class="k">const</span> estado = pm.variables.get(<span class="s">"esperadoEstado"</span>);
+<span class="k">const</span> error = pm.variables.get(<span class="s">"esperadoError"</span>);
+<span class="k">if</span> (estado) pm.test(<span class="s">"[negativo] Codigo HTTP "</span> + estado, () =&gt; pm.response.to.have.status(Number(estado)));
+<span class="k">if</span> (error)  pm.test(<span class="s">"[negativo] Mensaje de error: "</span> + error, () =&gt; pm.expect(pm.response.json().error).to.eql(error));</pre>
+
+<p><strong>Un caso negativo completo</strong> (pre-request de «Reserva para 13 personas»): solo los datos, sin lógica repetida.</p>
+<pre>POST {{baseUrl}}/api/reservas      Authorization: Bearer {{tokenCliente}}
+{ <span class="s">"fechaHora"</span>: <span class="s">"{{fechaReserva}}"</span>, <span class="s">"personas"</span>: 13 }
+
+pm.variables.set(<span class="s">"esperadoEstado"</span>, 400);
+pm.variables.set(<span class="s">"esperadoError"</span>, <span class="s">"Numero de personas invalido (1 a 12)"</span>);</pre>
+
+<p><strong>Caso positivo con validación de esquema y encadenamiento</strong> («Cliente crea reserva»):</p>
+<pre>pm.test(<span class="s">"Codigo HTTP 201 Created"</span>, () =&gt; pm.response.to.have.status(201));
+<span class="k">const</span> esquema = {
+    type: <span class="s">"object"</span>,
+    required: [<span class="s">"id"</span>, <span class="s">"clienteId"</span>, <span class="s">"fechaHora"</span>, <span class="s">"personas"</span>, <span class="s">"mesa"</span>, <span class="s">"estado"</span>],
+    properties: {
+        id: { type: <span class="s">"integer"</span>, minimum: 1 },   mesa: { type: <span class="s">"integer"</span>, minimum: 1 },
+        fechaHora: { type: <span class="s">"string"</span>, pattern: <span class="s">"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}"</span> },
+        estado: { enum: [<span class="s">"CONFIRMADA"</span>, <span class="s">"CANCELADA"</span>] }, ...
+    }
+};
+pm.test(<span class="s">"Cumple el esquema JSON de Reserva"</span>, () =&gt; pm.response.to.have.jsonSchema(esquema));
+<span class="k">const</span> r = pm.response.json();
+pm.test(<span class="s">"Queda CONFIRMADA con los datos enviados"</span>, () =&gt; {
+    pm.expect(r.estado).to.eql(<span class="s">"CONFIRMADA"</span>);
+    pm.expect(r.personas).to.eql(4);
+    pm.expect(r.fechaHora).to.eql(pm.collectionVariables.get(<span class="s">"fechaReserva"</span>));
+});
+pm.collectionVariables.set(<span class="s">"reservaId"</span>, r.id);   <span class="c">// usado por consultar y cancelar</span></pre>
+
+<p><strong>Ejecución automatizada</strong> (<code>pruebas/postman/package.json</code>):</p>
+<pre><span class="s">"test"</span>: <span class="s">"newman run SimpleFood_API.postman_collection.json -e local.postman_environment.json
+         -r cli,htmlextra,junit --reporter-htmlextra-export reportes/reporte-api.html
+         --reporter-junit-export reportes/junit-api.xml"</span></pre>
+</section>
+
+<section>
+<h3>5.5 Ejecución y resultados</h3>
+<figure><img src="evidencias/consola_04_newman_parte1.png"><figcaption>Figura 13. <code>npm test</code> (Newman), parte 1: autenticación y flujo principal de reservas.</figcaption></figure>
+<figure class="media"><img src="evidencias/consola_05_newman_parte2.png"><figcaption>Figura 14. Parte 2: casos negativos y resumen — 14 peticiones, 62 aserciones, 0 fallas, tiempo promedio de respuesta 5 ms.</figcaption></figure>
+<figure><img src="evidencias/api_01_reporte_htmlextra.png"><figcaption>Figura 15. Reporte HTML generado por newman-reporter-htmlextra (<code>reportes/reporte-api.html</code>).</figcaption></figure>
+<p>La colección se ejecutó dos veces seguidas contra el mismo servidor con el mismo resultado (62/62), lo que confirma que es
+<strong>repetible</strong>: la reserva creada se cancela al final del flujo y las fechas se recalculan en cada ejecución.</p>
+
+<h3>5.6 Hallazgo durante el desarrollo del script: falso positivo por estado compartido</h3>
+<p>En la primera ejecución, 6 aserciones fallaron en el <em>flujo principal</em>, que no tenía expectativas negativas:</p>
+<figure><img src="evidencias/consola_06_newman_primera_ejecucion.png"><figcaption>Figura 16. Primera ejecución: las peticiones exitosas heredaron la expectativa «400 / Credenciales invalidas» del caso anterior.</figcaption></figure>
+<p><strong>Causa:</strong> en Newman las variables definidas con <code>pm.variables.set</code> persisten durante toda la ejecución,
+así que la expectativa declarada por «Login con clave incorrecta» se filtró a las peticiones siguientes. <strong>Corrección:</strong>
+el pre-request de la colección, que se ejecuta antes del de cada petición, limpia las expectativas:</p>
+<pre><span class="c">// Las expectativas de casos negativos aplican solo a la peticion que las declara</span>
+pm.variables.unset(<span class="s">"esperadoEstado"</span>);
+pm.variables.unset(<span class="s">"esperadoError"</span>);</pre>
+<p>La lección es que los scripts de prueba también son software y pueden tener defectos: <strong>las pruebas deben ser independientes</strong>
+y no compartir estado de forma implícita. Que la suite fallara en rojo, y no que pasara en silencio, permitió detectarlo.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="cap">
+<h2>6. Buenas prácticas de scripting aplicadas</h2>
+<table>
+  <tr><th style="width:28%">Práctica</th><th>Cómo se aplicó</th></tr>
+  <tr><td>Separación de responsabilidades</td><td>Infraestructura (<code>BaseE2ETest</code>), interacción con la UI (<code>RegistroPage</code>) y casos (<code>RegistroClienteE2ETest</code>) en clases distintas. En Postman: entorno, colección y aserciones comunes separados.</td></tr>
+  <tr><td>Page Object Model</td><td>Los casos no contienen localizadores; un cambio en el HTML se corrige en un solo lugar. API fluida (<code>llenar(...).enviar()</code>).</td></tr>
+  <tr><td>Localizadores robustos</td><td>Se usan <code>id</code> estables agregados al diseñar el formulario, en vez de XPath frágiles dependientes de la estructura.</td></tr>
+  <tr><td>Esperas explícitas</td><td><code>WebDriverWait</code> + <code>ExpectedConditions</code> en lugar de <code>Thread.sleep</code>: pruebas más rápidas y sin intermitencia.</td></tr>
+  <tr><td>Independencia y repetibilidad</td><td>Navegador nuevo por caso, servidor en puerto libre, correos únicos, fechas dinámicas y limpieza de variables entre peticiones.</td></tr>
+  <tr><td>Pruebas guiadas por datos</td><td><code>@ParameterizedTest</code> + <code>@CsvSource</code>; casos negativos declarativos en Postman.</td></tr>
+  <tr><td>No duplicar (DRY)</td><td>Aserciones comunes a nivel de colección; utilidades <code>capturar()</code> y <code>correoUnico()</code> en la clase base.</td></tr>
+  <tr><td>Nombres descriptivos y trazabilidad</td><td>Cada prueba tiene un id (CP-WEB-xx / CP-API-xx) y un nombre que describe el comportamiento esperado; matriz de trazabilidad con los requisitos.</td></tr>
+  <tr><td>Mensajes de falla útiles</td><td>Mensajes en las aserciones («No debe llamarse a la API») y <code>assertAll</code> para ver todas las fallas de un caso a la vez.</td></tr>
+  <tr><td>Verificar el efecto, no solo la pantalla</td><td>El registro exitoso se confirma también en el backend (el usuario puede iniciar sesión); los casos inválidos confirman que el usuario no se creó.</td></tr>
+  <tr><td>Evidencia automática</td><td>Capturas numeradas por caso, reporte HTML y JUnit XML (consumible por un servidor de integración continua).</td></tr>
+  <tr><td>Pruebas lentas aisladas</td><td><code>@Tag("e2e")</code> + perfil Maven: la suite unitaria sigue tardando segundos y no requiere navegador.</td></tr>
+  <tr><td>Datos sensibles fuera del script</td><td>Credenciales en el archivo de entorno, marcadas como tipo <em>secret</em>.</td></tr>
+  <tr><td>Control de versiones</td><td>Rama <code>feature/pruebas-automatizadas</code> y commits pequeños que referencian la materia.</td></tr>
+</table>
+
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="cap">
+<h2>7. Documentación técnica del flujo de ejecución</h2>
+<h3>7.1 Prerrequisitos</h3>
+<ul>
+  <li>JDK 21 y Maven 3.9+ (para el script de formulario web); Google Chrome instalado. No hace falta descargar el
+      <code>chromedriver</code>: Selenium Manager lo resuelve automáticamente.</li>
+  <li>Node.js 18+ y npm (para el script de API).</li>
+</ul>
+
+<h3>7.2 Script 1 – Formulario web</h3>
+<pre>git clone https://github.com/camilohurtado/simplefood.git
+cd simplefood &amp;&amp; git checkout feature/pruebas-automatizadas
+
+mvn test                      <span class="c"># 23 pruebas unitarias/integración (sin navegador)</span>
+mvn test -Pe2e                <span class="c"># 8 pruebas Selenium en Chrome headless</span>
+mvn test -Pe2e -Dheadless=false   <span class="c"># igual, pero viendo el navegador</span>
+
+<span class="c"># Evidencias: target/evidencias/selenium/NN_metodo_etiqueta.png</span>
+<span class="c"># Reportes:   target/surefire-reports/</span></pre>
+<p><strong>Qué ocurre internamente:</strong> (1) JUnit filtra las clases con <code>@Tag("e2e")</code>; (2) <code>@BeforeAll</code>
+crea un <code>Contexto</code> con datos demo y levanta <code>ServidorWeb</code> en un puerto libre; (3) por cada caso,
+<code>@BeforeEach</code> abre Chrome headless (1000×900); (4) el caso usa <code>RegistroPage</code> para interactuar y
+verifica la UI y el backend; (5) <code>@AfterEach</code> guarda una captura del estado final y cierra el navegador;
+(6) <code>@AfterAll</code> detiene el servidor.</p>
+
+<h3>7.3 Script 2 – API REST</h3>
+<pre>mvn package &amp;&amp; java -jar target/simplefood-1.0.0.jar   <span class="c"># terminal 1: servidor en :8080</span>
+
+cd pruebas/postman                                      <span class="c"># terminal 2</span>
+npm install                                             <span class="c"># newman + reporter htmlextra</span>
+npm test
+
+<span class="c"># Reportes: pruebas/postman/reportes/reporte-api.html y junit-api.xml</span>
+<span class="c"># Alternativa manual: importar la colección y el entorno en Postman y usar "Run collection".</span></pre>
+<p><strong>Qué ocurre internamente:</strong> por cada petición Newman ejecuta (1) el pre-request de la colección (limpia
+expectativas y calcula fechas), (2) el pre-request de la petición (declara expectativas negativas si aplica), (3) la llamada HTTP con
+las variables resueltas, (4) el script de pruebas de la colección (aserciones comunes) y (5) el de la petición (aserciones
+específicas y guardado de variables para las siguientes).</p>
+
+<h3>7.4 Integración continua (propuesta)</h3>
+<p>Ambos scripts producen reportes JUnit XML y terminan con código de salida distinto de cero si algo falla, así que pueden
+ejecutarse en un pipeline (por ejemplo, GitHub Actions) en cada <em>pull request</em> hacia <code>main</code>: primero
+<code>mvn test</code> (rápido), luego <code>mvn test -Pe2e</code> y Newman contra el servidor recién empaquetado, bloqueando la
+integración si alguna prueba falla.</p>
+<figure><img src="evidencias/consola_07_git_log.png"><figcaption>Figura 17. Commits del taller en la rama <code>feature/pruebas-automatizadas</code>; cada mensaje referencia la materia Pruebas de Calidad de Software.</figcaption></figure>
+</section>
+
+<!-- ============================================================ 8 -->
+<section style="margin-top:22px">
+<h2>8. Reflexión sobre la utilidad de las pruebas automatizadas</h2>
+<p>Construir estos dos scripts sobre un sistema propio dejó varias conclusiones concretas, más allá de la teoría.</p>
+<p><strong>La automatización convierte la verificación en algo barato y repetible.</strong> Diligenciar a mano el formulario con
+ocho combinaciones de datos, o lanzar catorce peticiones en Postman revisando códigos y mensajes uno por uno, toma varios minutos y
+es propenso a errores de atención. Las mismas verificaciones automatizadas tardan unos 17 segundos (Selenium) y menos de medio
+segundo (Newman), y se pueden repetir después de cada cambio sin costo adicional. Eso habilita las pruebas de regresión: cuando
+alguien modifique las reglas de registro o de reservas, la suite avisará si se rompió un comportamiento existente.</p>
+<p><strong>Una prueba solo vale si es capaz de fallar.</strong> El experimento del defecto inyectado (cambiar <code>&gt;= 6</code> por
+<code>&gt;= 5</code>) mostró que el caso de valor límite detecta un error que a simple vista pasaría desapercibido, y que los mensajes de
+falla indican exactamente qué se rompió. Sin ese caso límite, el defecto habría llegado a producción.</p>
+<p><strong>El código de prueba también es software y tiene defectos.</strong> El falso positivo de la colección de Postman (estado
+compartido entre peticiones) muestra que los scripts necesitan el mismo cuidado de diseño que el código de producción: independencia
+entre casos, nombres claros, poca duplicación. Por eso se invirtió en la estructura (Page Object, clase base, aserciones comunes):
+el costo inicial es mayor, pero el mantenimiento posterior es mucho menor.</p>
+<p><strong>Automatizar obliga a pensar en la testabilidad y aporta hallazgos de calidad.</strong> Diseñar el formulario con identificadores
+estables y mensajes claros facilitó tanto las pruebas como la accesibilidad. Además, al escribir las aserciones se detectó que la
+API responde 400 en lugar de 404 para recursos inexistentes, una inconsistencia que una prueba manual rápida probablemente no habría
+registrado.</p>
+<p><strong>Sus límites.</strong> Las pruebas automatizadas no reemplazan la exploración manual ni el criterio humano: verifican solo
+lo que se les indicó comprobar (no detectan, por ejemplo, un problema de diseño visual o de usabilidad), requieren mantenimiento cuando la
+interfaz cambia y las pruebas de interfaz son más lentas y frágiles que las de API o unitarias. Por eso conviene seguir la pirámide de
+pruebas: muchas pruebas unitarias (SimpleFood tiene 23), un conjunto mediano de pruebas de API/servicio (la colección de 14
+peticiones) y pocas pruebas end-to-end de interfaz enfocadas en los flujos críticos (los 8 casos del formulario).</p>
+<p>En resumen, la automatización no busca eliminar al probador, sino liberarlo de la verificación repetitiva para que dedique su
+tiempo a diseñar mejores casos y a explorar lo que todavía no está cubierto.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="cap">
+<h2>9. Conclusiones</h2>
+<ul>
+  <li>Se desarrollaron y documentaron los dos scripts requeridos sobre un sistema real: <strong>formulario web</strong>
+      (JUnit 5 + Selenium, 8 casos) y <strong>API REST</strong> (Postman + Newman, 14 peticiones y 62 aserciones). Todos aprobaron.</li>
+  <li>Los casos se derivaron de forma sistemática de las reglas de negocio del código mediante partición de equivalencias, valores
+      límite, pruebas negativas y de flujo, con trazabilidad hacia los requisitos.</li>
+  <li>Se comprobó la eficacia de la suite con un defecto inyectado y se corrigió un falso positivo del propio script.</li>
+  <li>Se identificó una mejora para el sistema: devolver <code>404</code> cuando una reserva no existe.</li>
+  <li>Los scripts quedaron versionados en la rama <code>feature/pruebas-automatizadas</code>, listos para integrarse a un pipeline de CI.</li>
+</ul>
+
+<h2 style="margin-top:28px">10. Referencias</h2>
+<ul>
+  <li>Selenium Project. <em>Selenium WebDriver documentation</em> y <em>Page Object Models</em>. https://www.selenium.dev/documentation/</li>
+  <li>JUnit Team. <em>JUnit 5 User Guide</em> (etiquetas, pruebas parametrizadas, <code>assertAll</code>). https://junit.org/junit5/docs/current/user-guide/</li>
+  <li>Postman. <em>Writing tests and scripts</em> / <em>Variables</em>. https://learning.postman.com/docs/</li>
+  <li>Postman. <em>Newman – command-line collection runner</em>. https://github.com/postmanlabs/newman</li>
+  <li>ISTQB. <em>Certified Tester Foundation Level Syllabus v4.0</em> (técnicas de caja negra y proceso de pruebas).</li>
+  <li>Apache Maven. <em>Surefire Plugin – Using JUnit 5 Platform: filtering by tags</em>. https://maven.apache.org/surefire/</li>
+</ul>
+</section>
+
+</body>
+</html>
