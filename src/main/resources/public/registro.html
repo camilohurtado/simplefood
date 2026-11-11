@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SimpleFood - Registro de clientes</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #faf7f2; color: #222; }
+    header { background: #b5452f; color: #fff; padding: 16px 24px; }
+    header a { color: #fff; }
+    main { max-width: 480px; margin: 24px auto; padding: 0 16px; }
+    form { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px #0002;
+           display: grid; gap: 12px; }
+    label { display: grid; gap: 4px; font-weight: 600; font-size: .95rem; }
+    input { font: inherit; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; }
+    input[aria-invalid="true"] { border-color: #c0392b; background: #fff5f4; }
+    .error-campo { color: #c0392b; font-weight: 400; font-size: .85rem; min-height: 1em; }
+    button { font: inherit; padding: 10px; border: 0; border-radius: 6px; background: #b5452f;
+             color: #fff; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .alerta { padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+    .alerta.exito { background: #e7f6ec; color: #1e6b3a; border: 1px solid #a8dbb8; }
+    .alerta.error { background: #fdecea; color: #8a1f11; border: 1px solid #f1b0a7; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>SimpleFood</h1>
+  <p>Registro de clientes &middot; <a href="/">Volver al menu</a></p>
+</header>
+<main>
+  <div id="alerta" class="alerta" role="status" hidden></div>
+  <form id="form-registro" novalidate>
+    <label>Nombre completo
+      <input id="nombre" name="nombre" type="text" autocomplete="name">
+      <span class="error-campo" id="error-nombre"></span>
+    </label>
+    <label>Correo electronico
+      <input id="correo" name="correo" type="email" autocomplete="email">
+      <span class="error-campo" id="error-correo"></span>
+    </label>
+    <label>Clave
+      <input id="clave" name="clave" type="password" autocomplete="new-password">
+      <span class="error-campo" id="error-clave"></span>
+    </label>
+    <label>Confirmar clave
+      <input id="confirmacion" name="confirmacion" type="password" autocomplete="new-password">
+      <span class="error-campo" id="error-confirmacion"></span>
+    </label>
+    <button id="btn-registrar" type="submit">Crear cuenta</button>
+  </form>
+</main>
+<script>
+  const form = document.getElementById('form-registro');
+  const alerta = document.getElementById('alerta');
+  const boton = document.getElementById('btn-registrar');
+  const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function mostrarAlerta(tipo, mensaje) {
+    alerta.className = 'alerta ' + tipo;
+    alerta.textContent = mensaje;
+    alerta.hidden = false;
+  }
+
+  function marcar(campo, mensaje) {
+    document.getElementById('error-' + campo).textContent = mensaje || '';
+    document.getElementById(campo).setAttribute('aria-invalid', mensaje ? 'true' : 'false');
+    return !mensaje;
+  }
+
+  /** Reglas del lado del cliente; reflejan las de AuthService.registrar. */
+  function validar(d) {
+    let ok = marcar('nombre', d.nombre.trim() ? '' : 'El nombre es obligatorio');
+    ok = marcar('correo', CORREO.test(d.correo) ? '' : 'Ingrese un correo valido') && ok;
+    ok = marcar('clave', d.clave.length >= 6 ? '' : 'La clave debe tener al menos 6 caracteres') && ok;
+    ok = marcar('confirmacion', d.clave === d.confirmacion ? '' : 'Las claves no coinciden') && ok;
+    return ok;
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    alerta.hidden = true;
+    const d = Object.fromEntries(new FormData(form));
+    if (!validar(d)) {
+      return;
+    }
+    boton.disabled = true;
+    try {
+      const r = await fetch('/api/auth/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: d.nombre.trim(), correo: d.correo.trim(), clave: d.clave })
+      });
+      const cuerpo = await r.json();
+      if (r.status === 201) {
+        mostrarAlerta('exito', `Bienvenido, ${cuerpo.nombre}. Tu cuenta de cliente fue creada.`);
+        form.reset();
+      } else {
+        mostrarAlerta('error', cuerpo.error || 'No fue posible completar el registro');
+      }
+    } catch (err) {
+      mostrarAlerta('error', 'Error de conexion con el servidor');
+    } finally {
+      boton.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
