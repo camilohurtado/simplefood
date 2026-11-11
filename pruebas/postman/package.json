@@ -1,0 +1,13 @@
+{
+  "name": "simplefood-pruebas-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ejecucion automatizada de la coleccion Postman de SimpleFood con Newman",
+  "scripts": {
+    "test": "newman run SimpleFood_API.postman_collection.json -e local.postman_environment.json -r cli,htmlextra,junit --reporter-htmlextra-export reportes/reporte-api.html --reporter-htmlextra-title \"SimpleFood - Pruebas API\" --reporter-junit-export reportes/junit-api.xml"
+  },
+  "devDependencies": {
+    "newman": "6.2.3",
+    "newman-reporter-htmlextra": "1.23.1"
+  }
+}

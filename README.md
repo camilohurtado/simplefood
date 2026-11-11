@@ -51,6 +51,17 @@ mvn test
 Incluye pruebas unitarias por módulo y pruebas de integración de la API
 (`ApiIntegracionTest`) que levantan el servidor real.
 
+### Pruebas automatizadas funcionales (Pruebas de Calidad de Software)
+
+| Script | Herramienta | Ubicación | Ejecución |
+|---|---|---|---|
+| Formulario web de registro (`/registro.html`) | JUnit 5 + Selenium WebDriver (Page Object Model) | `src/test/java/com/simplefood/e2e` | `mvn test -Pe2e` (requiere Google Chrome) |
+| API REST de autenticación y reservas | Postman + Newman | `pruebas/postman` | servidor en :8080 y luego `cd pruebas/postman && npm install && npm test` |
+
+- `mvn test` excluye las pruebas `@Tag("e2e")`, por lo que no necesita navegador.
+- Con `-Dheadless=false` se ve el navegador durante la ejecución de Selenium.
+- Evidencias: capturas en `target/evidencias/selenium`; reportes HTML y JUnit de Newman en `pruebas/postman/reportes`.
+
 ## API principal
 
 | Método | Ruta | Rol |
